@@ -32,8 +32,8 @@ export default function LoginPage() {
     try {
       const response = await authApi.login({ email, password })
       
-      // Use the auth context login function
-      login(response.access_token)
+      // Use the auth context login function and then manually navigate
+      await login(response.access_token)
       
       toast({
         title: "Login successful",
@@ -41,8 +41,11 @@ export default function LoginPage() {
         variant: "default",
       })
       
-      // Redirect to dashboard
-      router.push("/")
+      // Delay the navigation slightly to avoid race conditions
+      setTimeout(() => {
+        console.log('Login page - navigating to dashboard after successful login')
+        router.push("/")
+      }, 100)
     } catch (error) {
       console.error("Login error:", error)
       toast({

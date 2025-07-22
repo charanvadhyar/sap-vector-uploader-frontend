@@ -96,17 +96,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (isMounted) {
       console.log('Auth state:', { isAuthenticated, pathname, user: !!user })
       
-      if (!isAuthenticated && pathname !== "/login" && pathname !== "/register") {
-        // If no token and not on auth pages, redirect to login
+      // Only redirect if the component is mounted and we're not already navigating
+      const isAuthPage = pathname === "/login" || pathname === "/register";
+      
+      if (!isAuthenticated && !isAuthPage) {
+        // If not authenticated and not on an auth page, go to login
         console.log('Auth redirect - not authenticated, redirecting to login')
         router.push("/login")
-      } else if (isAuthenticated && pathname === "/login") {
-        // If authenticated and on login page, redirect to dashboard
-        console.log('Auth redirect - already authenticated, redirecting to dashboard')
-        router.push("/")
       }
+      // Remove the automatic redirect from login to dashboard here
+      // Let the login function handle that navigation
     }
-  }, [isMounted, isAuthenticated, pathname, router, user])
+  }, [isMounted, isAuthenticated, pathname, router])
 
   const login = async (newToken: string) => {
     if (!newToken || newToken.trim() === "") {
@@ -125,9 +126,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('Setting authenticated state to true')
       setIsAuthenticated(true)
       
-      // Explicitly navigate to dashboard after successful login
-      console.log('Navigating to dashboard after successful login')
-      router.push("/")
+      // Navigation will be handled by the component that called login
+      // Don't navigate here to avoid conflicts with useEffect navigation
     }
   }
 
