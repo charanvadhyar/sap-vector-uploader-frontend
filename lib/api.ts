@@ -262,7 +262,11 @@ export const authApi = {
     
     try {
       // Direct fetch implementation for better control
-      const response = await fetch(`${API_BASE_URL}/auth/token`, {
+      // Ensure we have an absolute URL by using URL constructor
+      const authUrl = new URL('/auth/token', API_BASE_URL).toString();
+      console.log('Using absolute auth URL:', authUrl);
+      
+      const response = await fetch(authUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
