@@ -30,22 +30,33 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
+      console.log('Submitting login form')
       const response = await authApi.login({ email, password })
+      console.log('Login API response received')
       
-      // Use the auth context login function and then manually navigate
-      await login(response.access_token)
+      // Use the auth context login function which now returns the user
+      const user = await login(response.access_token)
+      console.log('Auth context login complete, user:', !!user)
       
-      toast({
-        title: "Login successful",
-        description: "You have been successfully authenticated.",
-        variant: "default",
-      })
-      
-      // Delay the navigation slightly to avoid race conditions
-      setTimeout(() => {
-        console.log('Login page - navigating to dashboard after successful login')
+      if (user) {
+        toast({
+          title: "Login successful",
+          description: "You have been successfully authenticated.",
+          variant: "default",
+        })
+        
+        console.log('Login successful, navigating to dashboard')
+        // Navigate after successful login
         router.push("/")
-      }, 100)
+      } else {
+        // If login returns null, there was an issue with the user data
+        console.error('Login succeeded but failed to fetch user data')
+        toast({
+          title: "Authentication error",
+          description: "Your login succeeded but we couldn't load your user data. Please try again.",
+          variant: "destructive",
+        })
+      }
     } catch (error) {
       console.error("Login error:", error)
       toast({
