@@ -41,12 +41,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Fetch user data when authenticated
   const fetchUserData = async (authToken: string) => {
     try {
+      console.log('Fetching user data with token')
       const userData = await getCurrentUser(authToken)
+      console.log('User data received:', userData)
       setUser(userData)
       return userData
     } catch (error) {
       console.error('Failed to fetch user data:', error)
       // If user fetch fails, clear authentication
+      console.log('Clearing authentication due to user data fetch failure')
       localStorage.removeItem("token")
       setToken(null)
       setIsAuthenticated(false)
@@ -90,12 +93,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   
   // Handle redirects only after component is mounted on the client
   useEffect(() => {
-    if (isMounted && !isAuthenticated && pathname !== "/login" && pathname !== "/register") {
-      // If no token and not on auth pages, redirect to login
-      console.log('Auth redirect - not authenticated, redirecting to login')
-      router.push("/login")
+    if (isMounted) {
+      console.log('Auth state:', { isAuthenticated, pathname, user: !!user })
+      
+      if (!isAuthenticated && pathname !== "/login" && pathname !== "/register") {
+        // If no token and not on auth pages, redirect to login
+        console.log('Auth redirect - not authenticated, redirecting to login')
+        router.push("/login")
+      } else if (isAuthenticated && pathname === "/login") {
+        // If authenticated and on login page, redirect to dashboard
+        console.log('Auth redirect - already authenticated, redirecting to dashboard')
+        router.push("/")
+      }
     }
-  }, [isMounted, isAuthenticated, pathname, router])
+  }, [isMounted, isAuthenticated, pathname, router, user])
 
   const login = async (newToken: string) => {
     if (!newToken || newToken.trim() === "") {
@@ -109,8 +120,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     // Fetch user data after setting token
     const userData = await fetchUserData(newToken)
+    console.log('Login process - user data fetched:', !!userData)
     if (userData) {
+      console.log('Setting authenticated state to true')
       setIsAuthenticated(true)
+      
+      // Explicitly navigate to dashboard after successful login
+      console.log('Navigating to dashboard after successful login')
+      router.push("/")
     }
   }
 
