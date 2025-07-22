@@ -18,12 +18,19 @@ export default function LoginPage() {
   const [isMounted, setIsMounted] = useState(false)
   const router = useRouter()
 
-  const { login } = useAuth()
+  const { login, isAuthenticated } = useAuth()
   
   // Prevent hydration issues by setting mounted state
   useEffect(() => {
     setIsMounted(true)
   }, [])
+  
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace("/")
+    }
+  }, [isAuthenticated, router])
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -75,6 +82,17 @@ export default function LoginPage() {
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="w-full max-w-md p-8 text-center">
           <div className="animate-pulse">Loading...</div>
+        </div>
+      </div>
+    )
+  }
+  
+  // Don't show login form if user is already authenticated (redirecting)
+  if (isAuthenticated) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="w-full max-w-md p-8 text-center">
+          <div className="animate-pulse">Redirecting to dashboard...</div>
         </div>
       </div>
     )
