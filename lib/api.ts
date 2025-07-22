@@ -319,7 +319,19 @@ export const authApi = {
     if (!authToken) {
       throw new Error('No authentication token available');
     }
-    return fetchWithError<UserResponse>(`${API_BASE_URL}/auth/me`, {
+    
+    // Safely construct the URL using the same approach as login
+    let userUrl;
+    try {
+      userUrl = new URL('/auth/me', API_BASE_URL).toString();
+      console.log('Using absolute user URL:', userUrl);
+    } catch (error) {
+      console.error('URL construction failed for user endpoint, falling back to string concatenation:', error);
+      userUrl = `${API_BASE_URL}/auth/me`;
+      console.log('Using fallback user URL:', userUrl);
+    }
+    
+    return fetchWithError<UserResponse>(userUrl, {
       headers: {
         'Authorization': `Bearer ${authToken}`,
       },
