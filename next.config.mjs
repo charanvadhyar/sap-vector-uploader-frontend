@@ -15,9 +15,6 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  experimental: {
-    optimizeCss: true,
-  },
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
@@ -26,16 +23,6 @@ const nextConfig = {
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': path.resolve(__dirname),
-    }
-    
-    // Optimize CSS handling
-    if (!dev && !isServer) {
-      config.optimization.splitChunks.cacheGroups.styles = {
-        name: 'styles',
-        test: /\.(css|scss|sass)$/,
-        chunks: 'all',
-        enforce: true,
-      }
     }
     
     return config
