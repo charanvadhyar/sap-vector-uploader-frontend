@@ -1,6 +1,13 @@
 // API service functions for SAP FICO Uploader
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+// Ensure API_BASE_URL is a proper URL with protocol
+let API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+
+// Add protocol if missing
+if (API_BASE_URL && !API_BASE_URL.startsWith('http://') && !API_BASE_URL.startsWith('https://')) {
+  API_BASE_URL = `https://${API_BASE_URL}`;
+  console.log('Added https:// protocol to API_BASE_URL:', API_BASE_URL);
+}
 
 // General API utility function
 export async function fetchWithError<T>(
@@ -262,9 +269,18 @@ export const authApi = {
     
     try {
       // Direct fetch implementation for better control
-      // Ensure we have an absolute URL by using URL constructor
-      const authUrl = new URL('/auth/token', API_BASE_URL).toString();
-      console.log('Using absolute auth URL:', authUrl);
+      // Safely construct the auth URL
+      let authUrl;
+      try {
+        // Attempt to use URL constructor
+        authUrl = new URL('/auth/token', API_BASE_URL).toString();
+        console.log('Using absolute auth URL:', authUrl);
+      } catch (error) {
+        // Fallback to string concatenation if URL construction fails
+        console.error('URL construction failed, falling back to string concatenation:', error);
+        authUrl = `${API_BASE_URL}/auth/token`;
+        console.log('Using fallback auth URL:', authUrl);
+      }
       
       const response = await fetch(authUrl, {
         method: 'POST',
